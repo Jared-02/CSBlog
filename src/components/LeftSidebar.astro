@@ -1,0 +1,105 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+	allPosts: CollectionEntry<'blog'>[];
+	currentPostId?: string;
+}
+
+const { allPosts, currentPostId } = Astro.props;
+
+const recentPosts = allPosts
+	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+	.slice(0, 5);
+
+const allTags = [...new Set(allPosts.flatMap((p) => p.data.tags ?? []))];
+---
+
+<aside class="left-sidebar">
+	<a href="/blog" class="all-posts">All posts</a>
+
+	<div class="section">
+		<h3 class="section-title">Recent</h3>
+		<ul>
+			{recentPosts.map((post) => (
+				<li>
+					<a
+						href={`/blog/${post.id}/`}
+						class:list={[{ active: post.id === currentPostId }]}
+					>
+						{post.data.title}
+					</a>
+				</li>
+			))}
+		</ul>
+	</div>
+
+	{allTags.length > 0 && (
+		<div class="section">
+			<h3 class="section-title">Topics</h3>
+			<ul>
+				{allTags.map((tag) => (
+					<li><a href={`/blog/tag/${tag}/`}>{tag}</a></li>
+				))}
+			</ul>
+		</div>
+	)}
+</aside>
+
+<style>
+	.left-sidebar {
+		position: sticky;
+		top: 2rem;
+		align-self: start;
+		padding-right: 1.5rem;
+		border-right: 1px solid rgb(var(--gray-light));
+		font-size: 0.875rem;
+		line-height: 1.6;
+	}
+	.all-posts {
+		display: block;
+		color: rgb(var(--gray-dark));
+		text-decoration: none;
+		margin-bottom: 1.5rem;
+		font-weight: 500;
+	}
+	.all-posts:hover {
+		color: rgb(var(--black));
+	}
+	.section {
+		margin-bottom: 1.5rem;
+	}
+	.section-title {
+		font-size: 0.8rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.02em;
+		color: rgb(var(--gray-dark));
+		margin: 0 0 0.5rem 0;
+	}
+	ul {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+	li {
+		margin-bottom: 0.25rem;
+	}
+	a {
+		color: rgb(var(--gray));
+		text-decoration: none;
+		display: block;
+		padding: 0.25rem 0.5rem;
+		border-radius: 6px;
+		transition: background 0.15s, color 0.15s;
+	}
+	a:hover {
+		color: rgb(var(--gray-dark));
+		background: rgba(var(--gray-light), 0.5);
+	}
+	a.active {
+		color: rgb(var(--black));
+		background: rgba(var(--gray-light), 0.8);
+		font-weight: 600;
+	}
+</style>

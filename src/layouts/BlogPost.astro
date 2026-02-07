@@ -5,20 +5,34 @@ import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
+import LeftSidebar from '../components/LeftSidebar.astro';
+import TableOfContents from '../components/TableOfContents.astro';
 
-type Props = CollectionEntry<'blog'>['data'];
+interface Props {
+	data: CollectionEntry<'blog'>['data'];
+	headings: { depth: number; slug: string; text: string }[];
+	allPosts: CollectionEntry<'blog'>[];
+	currentPostId: string;
+}
 
-const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
+const { data, headings, allPosts, currentPostId } = Astro.props;
+const { title, description, pubDate, updatedDate, heroImage } = data;
 ---
 
 <html lang="en">
 	<head>
 		<BaseHead title={title} description={description} />
 		<style>
-			main {
-				width: calc(100% - 2em);
-				max-width: 100%;
-				margin: 0;
+			.page-layout {
+				display: grid;
+				grid-template-columns: 200px 1fr 200px;
+				gap: 2rem;
+				max-width: 1200px;
+				margin: 0 auto;
+				padding: 2rem 1.5rem;
+			}
+			.content-area {
+				min-width: 0;
 			}
 			.hero-image {
 				width: 100%;
@@ -30,27 +44,48 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 				box-shadow: var(--box-shadow);
 			}
 			.prose {
-				width: 720px;
-				max-width: calc(100% - 2em);
-				margin: auto;
-				padding: 1em;
+				max-width: 100%;
+				padding: 0;
 				color: rgb(var(--gray-dark));
 			}
 			.title {
 				margin-bottom: 1em;
 				padding: 1em 0;
-				text-align: center;
 				line-height: 1;
 			}
 			.title h1 {
 				margin: 0 0 0.5em 0;
+				font-size: 2rem;
 			}
 			.date {
 				margin-bottom: 0.5em;
 				color: rgb(var(--gray));
+				font-size: 0.9rem;
 			}
 			.last-updated-on {
 				font-style: italic;
+			}
+			@media (max-width: 1024px) {
+				.page-layout {
+					grid-template-columns: 1fr;
+					padding: 1rem;
+				}
+				.left-sidebar-wrapper,
+				.right-sidebar-wrapper {
+					display: none;
+				}
+			}
+			@media (max-width: 768px) {
+				.page-layout {
+					padding: 0.75rem;
+					gap: 1rem;
+				}
+				.title h1 {
+					font-size: 1.5rem;
+				}
+				.title {
+					padding: 0.5em 0;
+				}
 			}
 		</style>
 	</head>
@@ -58,29 +93,60 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 	<body>
 		<Header />
 		<main>
-			<article>
-				<div class="hero-image">
-					{heroImage && <Image width={1020} height={510} src={heroImage} alt="" />}
+			<div class="page-layout">
+				<div class="left-sidebar-wrapper">
+					<LeftSidebar allPosts={allPosts} currentPostId={currentPostId} />
 				</div>
-				<div class="prose">
-					<div class="title">
-						<div class="date">
-							<FormattedDate date={pubDate} />
-							{
-								updatedDate && (
-									<div class="last-updated-on">
-										Last updated on <FormattedDate date={updatedDate} />
-									</div>
-								)
-							}
+				<div class="content-area">
+					<article>
+						<div class="hero-image">
+							{heroImage && <Image width={1020} height={510} src={heroImage} alt="" />}
 						</div>
-						<h1>{title}</h1>
-						<hr />
-					</div>
-					<slot />
+						<div class="prose">
+							<div class="title">
+								<div class="date">
+									<FormattedDate date={pubDate} />
+									{
+										updatedDate && (
+											<div class="last-updated-on">
+												Last updated on <FormattedDate date={updatedDate} />
+											</div>
+										)
+									}
+								</div>
+								<h1>{title}</h1>
+								<hr />
+							</div>
+							<slot />
+						</div>
+					</article>
 				</div>
-			</article>
+				<div class="right-sidebar-wrapper">
+					<TableOfContents headings={headings} />
+				</div>
+			</div>
 		</main>
 		<Footer />
+		<script>
+			document.querySelectorAll('pre').forEach((pre) => {
+				const btn = document.createElement('button');
+				btn.className = 'copy-btn';
+				btn.setAttribute('aria-label', 'Copy code');
+				btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+				btn.addEventListener('click', () => {
+					const code = pre.querySelector('code');
+					if (code) {
+						navigator.clipboard.writeText(code.textContent || '');
+						btn.classList.add('copied');
+						btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+						setTimeout(() => {
+							btn.classList.remove('copied');
+							btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+						}, 2000);
+					}
+				});
+				pre.appendChild(btn);
+			});
+		</script>
 	</body>
 </html>

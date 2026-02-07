@@ -1,0 +1,133 @@
+---
+interface Heading {
+	depth: number;
+	slug: string;
+	text: string;
+}
+
+interface Props {
+	headings: Heading[];
+}
+
+const { headings } = Astro.props;
+const tocHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
+---
+
+{tocHeadings.length > 0 && (
+	<aside class="toc">
+		<nav>
+			<ul>
+				{tocHeadings.map((heading) => (
+					<li class:list={[`depth-${heading.depth}`]}>
+						<a href={`#${heading.slug}`} data-slug={heading.slug}>{heading.text}</a>
+					</li>
+				))}
+			</ul>
+		</nav>
+	</aside>
+)}
+
+<style>
+	.toc {
+		position: sticky;
+		top: 2rem;
+		align-self: start;
+		padding-left: 1.5rem;
+		font-size: 0.8rem;
+		line-height: 1.6;
+		max-height: calc(100vh - 4rem);
+		overflow-y: auto;
+	}
+	ul {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		position: relative;
+	}
+	/* Track line */
+	ul::before {
+		content: '';
+		position: absolute;
+		left: 0;
+		top: 0;
+		bottom: 0;
+		width: 2px;
+		background: rgb(var(--gray-light));
+		border-radius: 1px;
+	}
+	li {
+		margin-bottom: 0.1rem;
+		position: relative;
+	}
+	li.depth-3 {
+		padding-left: 0.75rem;
+	}
+	a {
+		color: rgb(var(--gray));
+		text-decoration: none;
+		display: block;
+		padding: 0.2rem 0 0.2rem 1rem;
+		border-left: 2px solid transparent;
+		margin-left: -1px;
+		transition: color 0.2s, border-color 0.2s;
+		font-size: 0.8rem;
+	}
+	a:hover {
+		color: rgb(var(--gray-dark));
+	}
+	a.active {
+		color: var(--accent);
+		border-left-color: var(--accent);
+		font-weight: 600;
+	}
+</style>
+
+<script>
+	function initTocHighlight() {
+		const tocLinks = document.querySelectorAll<HTMLAnchorElement>('.toc a[data-slug]');
+		if (!tocLinks.length) return;
+
+		const slugs = Array.from(tocLinks).map((a) => a.dataset.slug!);
+		const headingEls = slugs
+			.map((slug) => document.getElementById(slug))
+			.filter(Boolean) as HTMLElement[];
+
+		if (!headingEls.length) return;
+
+		let activeSlug = '';
+
+		function update() {
+			const scrollY = window.scrollY;
+			const offset = 100;
+			let current = '';
+
+			for (let i = headingEls.length - 1; i >= 0; i--) {
+				if (headingEls[i].offsetTop <= scrollY + offset) {
+					current = headingEls[i].id;
+					break;
+				}
+			}
+
+			// If near the top, highlight the first heading
+			if (!current && headingEls.length) {
+				current = headingEls[0].id;
+			}
+
+			if (current === activeSlug) return;
+			activeSlug = current;
+
+			tocLinks.forEach((a) => {
+				if (a.dataset.slug === current) {
+					a.classList.add('active');
+				} else {
+					a.classList.remove('active');
+				}
+			});
+		}
+
+		window.addEventListener('scroll', update, { passive: true });
+		update();
+	}
+
+	initTocHighlight();
+</script>
