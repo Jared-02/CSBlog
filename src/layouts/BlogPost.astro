@@ -6,6 +6,7 @@ import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
 import LeftSidebar from '../components/LeftSidebar.astro';
+import MobileTableOfContents from '../components/MobileTableOfContents.astro';
 import Search from '../components/Search.astro';
 import TableOfContents from '../components/TableOfContents.astro';
 
@@ -93,6 +94,7 @@ const { title, description, pubDate, updatedDate, heroImage } = data;
 
 	<body>
 		<Header />
+		<MobileTableOfContents headings={headings} />
 		<main>
 			<div class="page-layout">
 				<div class="left-sidebar-wrapper">
