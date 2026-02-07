@@ -1,0 +1,107 @@
+<!-- Search modal overlay (global, included on every page) -->
+<div class="search-modal-overlay" id="search-overlay" data-base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
+	<div class="search-modal" id="search-modal">
+		<div id="pagefind-container"></div>
+	</div>
+</div>
+
+<style is:global>
+	.search-modal-overlay {
+		display: none;
+		position: fixed;
+		inset: 0;
+		z-index: 1000;
+		background: rgba(0, 0, 0, 0.4);
+		justify-content: center;
+		align-items: flex-start;
+		padding-top: 10vh;
+	}
+	.search-modal-overlay.active {
+		display: flex;
+	}
+	.search-modal {
+		background: white;
+		border-radius: 12px;
+		width: 90%;
+		max-width: 560px;
+		max-height: 70vh;
+		overflow-y: auto;
+		box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+		padding: 1rem;
+	}
+</style>
+
+<script is:inline>
+	(function() {
+		var pagefindLoaded = false;
+
+		function getOverlay() {
+			return document.getElementById('search-overlay');
+		}
+
+		function loadScript(src) {
+			return new Promise(function(resolve, reject) {
+				var s = document.createElement('script');
+				s.src = src;
+				s.onload = resolve;
+				s.onerror = reject;
+				document.head.appendChild(s);
+			});
+		}
+
+		async function openSearch() {
+			var overlay = getOverlay();
+			if (overlay) overlay.classList.add('active');
+			if (!pagefindLoaded) {
+				pagefindLoaded = true;
+				try {
+					var base = overlay.getAttribute('data-base') || '';
+					await loadScript(base + '/pagefind/pagefind-ui.js');
+					new PagefindUI({
+						element: '#pagefind-container',
+						showSubResults: true,
+						showImages: false,
+					});
+				} catch (e) {
+					var container = document.getElementById('pagefind-container');
+					if (container) container.innerHTML = '<p style="padding:1rem;color:#888;">Search index not available. Run <code>npm run build</code> first.</p>';
+				}
+			}
+			setTimeout(function() {
+				var input = document.querySelector('#pagefind-container input');
+				if (input) input.focus();
+			}, 100);
+		}
+
+		function closeSearch() {
+			var overlay = getOverlay();
+			if (overlay) overlay.classList.remove('active');
+		}
+
+		// Sidebar trigger button (if present)
+		var trigger = document.getElementById('search-trigger');
+		if (trigger) trigger.addEventListener('click', function() { openSearch(); });
+
+		// Click outside modal to close
+		var overlay = getOverlay();
+		if (overlay) overlay.addEventListener('click', function(e) {
+			if (e.target === overlay) closeSearch();
+		});
+
+		// Keyboard shortcuts: Ctrl+K to toggle, Escape to close
+		document.addEventListener('keydown', function(e) {
+			if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+				e.preventDefault();
+				var ov = getOverlay();
+				if (ov && ov.classList.contains('active')) {
+					closeSearch();
+				} else {
+					openSearch();
+				}
+			}
+			if (e.key === 'Escape') {
+				closeSearch();
+			}
+		});
+	})();
+</script>

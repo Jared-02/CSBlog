@@ -118,7 +118,7 @@ pre {
 	border-radius: 8px;
 	border: 1px solid rgb(var(--gray-light));
 	font-size: 0.875rem;
-	line-height: 1.7;
+	line-height: 1.45;
 	overflow-x: auto;
 }
 pre > code {
@@ -217,4 +217,16 @@ hr {
 	clip-path: inset(50%);
 	/* added line to stop words getting smushed together (as they go onto separate lines and some screen readers do not understand line feeds as a space */
 	white-space: nowrap;
+}
+
+/* Pagefind UI overrides */
+:root {
+	--pagefind-ui-scale: 0.85;
+	--pagefind-ui-primary: var(--accent);
+	--pagefind-ui-text: rgb(var(--gray-dark));
+	--pagefind-ui-background: #fff;
+	--pagefind-ui-border: rgb(var(--gray-light));
+	--pagefind-ui-border-width: 1px;
+	--pagefind-ui-border-radius: 8px;
+	--pagefind-ui-font: inherit;
 }

@@ -6,6 +6,7 @@ import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
 import LeftSidebar from '../components/LeftSidebar.astro';
+import Search from '../components/Search.astro';
 import TableOfContents from '../components/TableOfContents.astro';
 
 interface Props {
@@ -98,7 +99,7 @@ const { title, description, pubDate, updatedDate, heroImage } = data;
 					<LeftSidebar allPosts={allPosts} currentPostId={currentPostId} />
 				</div>
 				<div class="content-area">
-					<article>
+					<article data-pagefind-body>
 						<div class="hero-image">
 							{heroImage && <Image width={1020} height={510} src={heroImage} alt="" />}
 						</div>
@@ -127,6 +128,7 @@ const { title, description, pubDate, updatedDate, heroImage } = data;
 			</div>
 		</main>
 		<Footer />
+		<Search />
 		<script>
 			document.querySelectorAll('pre').forEach((pre) => {
 				const btn = document.createElement('button');
