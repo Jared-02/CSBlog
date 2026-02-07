@@ -113,54 +113,64 @@ code {
 }
 pre {
 	position: relative;
-	padding: 1.5em;
-	padding-top: 3em;
-	border-radius: 8px;
+	padding: 1em;
+	border-radius: 0 0 8px 8px;
 	border: 1px solid rgb(var(--gray-light));
+	border-top: none;
 	font-size: 0.875rem;
 	line-height: 1.45;
 	overflow-x: auto;
+	margin: 0;
 }
 pre > code {
 	all: unset;
 	font-family: "Cascadia Code", "Fira Code", "JetBrains Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
 }
-/* Language label - top left tab with blue underline */
-pre[data-language]::before {
-	content: attr(data-language);
-	position: absolute;
-	top: 0;
-	left: 0;
-	padding: 0.5em 1em;
-	font-family: inherit;
+/* Code block wrapper */
+.code-block {
+	margin-bottom: 1em;
+	border-radius: 8px;
+	overflow: hidden;
+	border: 1px solid rgb(var(--gray-light));
+}
+.code-block pre {
+	border: none;
+	border-radius: 0;
+}
+.code-bar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0.4em 0.75em;
+	background: rgba(var(--gray-light), 0.35);
+	border-bottom: 1px solid rgb(var(--gray-light));
 	font-size: 0.8rem;
+	min-height: 1.8em;
+}
+.code-lang {
 	font-weight: 600;
 	color: rgb(var(--gray-dark));
-	border-bottom: 2px solid var(--accent);
 	user-select: none;
 }
 /* Copy button */
-pre .copy-btn {
-	position: absolute;
-	top: 0.4em;
-	right: 0.5em;
+.code-bar .copy-btn {
 	background: none;
 	border: 1px solid transparent;
 	border-radius: 6px;
 	color: rgb(var(--gray));
 	cursor: pointer;
-	padding: 0.3em;
+	padding: 0.2em;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
-pre .copy-btn:hover {
+.code-bar .copy-btn:hover {
 	background: rgba(var(--gray-light), 0.8);
 	color: rgb(var(--gray-dark));
 	border-color: rgb(var(--gray-light));
 }
-pre .copy-btn.copied {
+.code-bar .copy-btn.copied {
 	color: #22c55e;
 }
 blockquote {
@@ -191,8 +201,11 @@ hr {
 		font-size: 1.25em;
 	}
 	pre {
-		padding: 2.5em 1em 1em;
+		padding: 0.75em;
 		font-size: 0.8rem;
+		border-radius: 0 0 6px 6px;
+	}
+	.code-block {
 		border-radius: 6px;
 	}
 	blockquote {
