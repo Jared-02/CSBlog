@@ -10,8 +10,8 @@ import { defineConfig } from 'astro/config';
 
 // https://astro.build/config
 export default defineConfig({
-	site: 'https://jared-02.github.io',
-	base: '/CSBlog',
+	site: process.env.SITE_URL || 'https://jared-02.github.io',
+	base: process.env.BASE_PATH || '/CSBlog',
 	integrations: [mdx(), sitemap(), pagefind({ indexConfig: { forceLanguage: 'zh-CN' } })],
 	markdown: {
 		remarkPlugins: [remarkMath],
