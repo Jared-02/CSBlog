@@ -104,10 +104,12 @@ const allTags = [...new Set(allPosts.flatMap((p) => p.data.tags ?? []))];
 		color: rgb(var(--gray-dark));
 		background: rgba(var(--gray-light), 0.5);
 	}
+	li a {
+		font-weight: 500;
+	}
 	a.active {
 		color: rgb(var(--black));
 		background: rgba(var(--gray-light), 0.8);
-		font-weight: 600;
 	}
 	/* Search trigger button */
 	.search-trigger {
