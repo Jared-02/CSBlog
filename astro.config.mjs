@@ -6,6 +6,7 @@ import pagefind from 'astro-pagefind';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import rehypeExternalLinks from 'rehype-external-links';
+import rehypeCodeGroup from './src/plugins/rehype-code-group.mjs';
 import { defineConfig } from 'astro/config';
 
 // https://astro.build/config
@@ -15,7 +16,7 @@ export default defineConfig({
 	integrations: [mdx(), sitemap(), pagefind({ indexConfig: { forceLanguage: 'zh-CN' } })],
 	markdown: {
 		remarkPlugins: [remarkMath],
-		rehypePlugins: [rehypeKatex, [rehypeExternalLinks, { target: '_blank', rel: ['noopener', 'noreferrer'] }]],
+		rehypePlugins: [rehypeKatex, [rehypeExternalLinks, { target: '_blank', rel: ['noopener', 'noreferrer'] }], rehypeCodeGroup],
 		shikiConfig: {
 			themes: {
 				light: 'github-light',

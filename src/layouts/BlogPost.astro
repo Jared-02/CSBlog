@@ -149,46 +149,80 @@ const { title, description, pubDate, updatedDate, heroImage } = data;
 				plaintext: '', text: '',
 			};
 
-			document.querySelectorAll('pre').forEach((pre) => {
-				const rawLang = pre.getAttribute('data-language') || '';
-				const lang = langMap[rawLang] ?? rawLang;
+			const copyIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+			const checkIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
 
-				// Wrap in container
-				const wrapper = document.createElement('div');
-				wrapper.className = 'code-block';
-				pre.parentNode!.insertBefore(wrapper, pre);
-
-				// Top bar
-				const bar = document.createElement('div');
-				bar.className = 'code-bar';
-
-				// Language label
-				const label = document.createElement('span');
-				label.className = 'code-lang';
-				label.textContent = lang;
-				bar.appendChild(label);
-
-				// Copy button
+			function createCopyButton(pre: Element) {
 				const btn = document.createElement('button');
 				btn.className = 'copy-btn';
 				btn.setAttribute('aria-label', 'Copy code');
-				btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+				btn.innerHTML = copyIcon;
 				btn.addEventListener('click', () => {
 					const code = pre.querySelector('code');
 					if (code) {
 						navigator.clipboard.writeText(code.textContent || '');
 						btn.classList.add('copied');
-						btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+						btn.innerHTML = checkIcon;
 						setTimeout(() => {
 							btn.classList.remove('copied');
-							btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+							btn.innerHTML = copyIcon;
 						}, 2000);
 					}
 				});
-				bar.appendChild(btn);
+				return btn;
+			}
+
+			// Standalone code blocks (not inside .code-group)
+			document.querySelectorAll('pre').forEach((pre) => {
+				if (pre.closest('.code-group')) return;
+
+				const rawLang = pre.getAttribute('data-language') || '';
+				const lang = langMap[rawLang] ?? rawLang;
+
+				const wrapper = document.createElement('div');
+				wrapper.className = 'code-block';
+				pre.parentNode!.insertBefore(wrapper, pre);
+
+				const bar = document.createElement('div');
+				bar.className = 'code-bar';
+
+				const label = document.createElement('span');
+				label.className = 'code-lang';
+				label.textContent = lang;
+				bar.appendChild(label);
+
+				bar.appendChild(createCopyButton(pre));
 
 				wrapper.appendChild(bar);
 				wrapper.appendChild(pre);
+			});
+
+			// Tabbed code groups
+			document.querySelectorAll('.code-group').forEach((group) => {
+				const tabs = group.querySelectorAll('.code-tab');
+				const panels = group.querySelectorAll('.code-tab-panel');
+
+				// Add copy button to each panel
+				panels.forEach((panel) => {
+					const pre = panel.querySelector('pre');
+					if (pre) {
+						const btnWrap = document.createElement('div');
+						btnWrap.className = 'code-tab-copy';
+						btnWrap.appendChild(createCopyButton(pre));
+						panel.appendChild(btnWrap);
+					}
+				});
+
+				tabs.forEach((tab) => {
+					tab.addEventListener('click', () => {
+						const index = (tab as HTMLElement).dataset.tabIndex;
+						tabs.forEach((t) => t.classList.remove('active'));
+						panels.forEach((p) => p.classList.remove('active'));
+						tab.classList.add('active');
+						const target = group.querySelector(`.code-tab-panel[data-panel-index="${index}"]`);
+						target?.classList.add('active');
+					});
+				});
 			});
 		</script>
 	</body>
